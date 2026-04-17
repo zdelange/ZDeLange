@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume</title>
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <style>
+/* ============================================================
+   styles.css — Shared stylesheet for index, resume, Scratch
+   ============================================================ */
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: #111;
+  min-height: 100vh;
+}
+
+/* ── Navbar ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 144px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  z-index: 100;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+}
+
+nav a:hover {
+  opacity: 0.7;
+}
+
+.nav-right {
+  display: flex;
+  gap: 32px;
+}
+
+/* ── Main content ── */
+main {
+  margin-top: 144px;
+  padding: 60px 48px 80px;
+}
+
+/* ── Page title (h1) ── */
+.page-title {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #000;
+  border-bottom: 8px solid #000;
+  padding-bottom: 28px;
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+/* ── Section headings (h2) ── */
+h2 {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  margin-top: 44px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 4px solid #000;
+}
+
+/* ── Body text ── */
+p {
+  font-size: 1.1rem;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* ── Lists ── */
+ul {
+  list-style: disc;
+  padding-left: 1.6rem;
+  margin-bottom: 10px;
+}
+
+ul li {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin-bottom: 4px;
+}
+
+ol {
+  margin-left: 1.2rem;
+  margin-bottom: 40px;
+}
+
+ol li {
+  margin-bottom: 0.9rem;
+}
+
+ol li ul {
+  margin: 0.4rem 0 0 1.4rem;
+  list-style: disc;
+}
+
+ol li ul li {
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 4px solid #000;
+  margin: 60px 0;
+}
+
+/* ============================================================
+   index.html specific
+   ============================================================ */
+
+/* Background */
+body.home {
+  background-image: linear-gradient(rgba(255,255,255,0.70), rgba(255,255,255,0.70)), url('Golf.webp');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+}
+
+/* Centered column layout */
+main.home-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Profile photo */
+.profile-photo {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-top: 60px;
+  margin-bottom: 40px;
+  display: block;
+}
+
+/* Intro text */
+.intro {
+  text-align: center;
+  max-width: 560px;
+}
+
+/* ============================================================
+   resume.html specific
+   ============================================================ */
+
+/* Centered, max-width column */
+main.resume-main {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Summary paragraph */
+.summary {
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: #222;
+}
+
+/* ============================================================
+   Scratch.html specific
+   ============================================================ */
+
+/* Scroll bottom */
+main.scratch-main {
+  margin-bottom: 100px;
+}
+
+/* Page header row (title + hero image) */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  border-bottom: 8px solid #000;
+  padding-bottom: 28px;
+  margin-bottom: 60px;
+}
+
+.hero-image {
+  width: min(320px, 100%);
+  height: auto;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.15);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+}
+
+/* Moment summary list */
+.moment-summary {
+  margin-bottom: 40px;
+}
+
+/* Individual moment section */
+.moment {
+  margin-bottom: 64px;
+}
+
+.moment-title {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.moment-title::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 1.1em;
+  background: #000;
+  flex-shrink: 0;
+}
+
+/* Video embed container */
+.video-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Video placeholder (before embed is added) */
+.video-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+  border: 2px dashed #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  letter-spacing: 0.03em;
+}
+
+/* Back-to-top footer */
+.page-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+  z-index: 150;
+}
+
+.page-footer.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.back-to-top {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.25);
+}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <div class="nav-right">
+      <a href="Scratch.html">My Work</a>
+    </div>
+  </nav>
+
+  <main class="resume-main">
+    <h1 class="page-title">My Resume</h1>
+
+    <h2>Professional Summary</h2>
+    <p class="summary">Motivated BYU student with experience in field sales, customer communication, physical operations, coaching, and service leadership. Brings strong interpersonal skills, teamwork, adaptability, and bilingual communication in English and Spanish. Experience includes direct customer interaction, training others, organizing teams, and working in fast-paced, service-oriented environments.</p>
+
+    <h2>Education</h2>
+    <p><strong>Brigham Young University</strong> — Provo, Utah<br />
+    Student<br />
+    2022–2028</p>
+
+    <h2>Experience</h2>
+
+    <p><strong>Field Sales Representative</strong><br />
+    EVO Marketing (Self-employed) — Missouri, United States<br />
+    Jun 2025 – Aug 2025</p>
+    <ul>
+      <li>Conducted door-to-door sales and focused on creating value for customers through clear, needs-based communication.</li>
+      <li>Built strong communication skills through direct customer interactions.</li>
+      <li>Developed practical understanding of the sales process and business operations.</li>
+    </ul>
+
+    <p><strong>In Field Mover</strong><br />
+    Bailey's Moving and Storage — North Salt Lake, Utah<br />
+    May 2022 – Aug 2022</p>
+    <ul>
+      <li>Moved household goods safely and efficiently while handling delicate items with care.</li>
+      <li>Helped organize warehouse operations and maintain orderly work areas.</li>
+      <li>Collaborated closely with team members to complete jobs quickly and effectively.</li>
+    </ul>
+
+    <p><strong>Landscaper</strong><br />
+    Barlow Brothers Lawncare — North Salt Lake, Utah<br />
+    May 2021 – Aug 2021</p>
+    <ul>
+      <li>Performed mowing, trimming, edging, and waste removal with strong attention to detail.</li>
+      <li>Took ownership of decisions on how to approach service for individual homes.</li>
+      <li>Strengthened work ethic, teamwork, and precision through hands-on outdoor labor.</li>
+    </ul>
+
+    <p><strong>Skills Trainer</strong><br />
+    Excel in Basketball — Walnut Creek, California<br />
+    Jun 2019 – Jul 2019</p>
+    <ul>
+      <li>Facilitated basketball skills development for camp attendees.</li>
+      <li>Coached multiple teams and encouraged athletes to improve outside their comfort zones.</li>
+      <li>Helped build teamwork, competitiveness, and a winning mindset among campers.</li>
+    </ul>
+
+    <h2>Volunteer Experience</h2>
+
+    <p><strong>Missionary</strong><br />
+    The Church of Jesus Christ of Latter-day Saints<br />
+    Jun 2023 – May 2025</p>
+    <ul>
+      <li>Served full-time in teaching, physical service, English classes, and community support.</li>
+      <li>Ran weekly trainings for other missionaries and coordinated group efforts.</li>
+      <li>Led conferences, directed teams, and helped build vision and culture within the mission structure.</li>
+    </ul>
+
+    <h2>Skills</h2>
+    <ul>
+      <li>Sales</li>
+      <li>Communication</li>
+      <li>Manual Labor</li>
+      <li>Organization Skills</li>
+      <li>Landscaping</li>
+      <li>Machine Operation</li>
+      <li>Team Leadership</li>
+      <li>Team Building</li>
+    </ul>
+
+    <h2>Languages</h2>
+    <ul>
+      <li>English — Native or bilingual proficiency</li>
+      <li>Spanish — Professional working proficiency</li>
+    </ul>
+
+  </main>
+
+</body>
+</html>
