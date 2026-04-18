@@ -5,22 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tiger Woods Top 3 Moments</title>
   <link href="styles.css" rel="stylesheet" />
+  <style>
+    .page-header {
+      justify-content: center;
+      align-items: center;
+    }
+    .play-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      border: 8px solid #000;
+      padding: 24px 28px;
+      width: min(220px, 100%);
+      line-height: 1.5;
+      transition: background 0.2s, color 0.2s;
+    }
+    .play-box:hover {
+      background: #000;
+      color: #fff;
+    }
+  </style>
 </head>
 <body id="top">
-
   <nav>
     <a href="index.html">Home</a>
     <div class="nav-right">
       <a href="resume.html">Resume</a>
       <a href="Tableau.html">Tableau</a>
+    </div>
   </nav>
-
   <main class="scratch-main">
     <div class="page-header">
       <h1 class="page-title">Tiger Woods<br>Top 3 Moments</h1>
       <img class="hero-image" src="Tiger.jpg" alt="Tiger Woods" />
+      <a href="golfgame.html" class="play-box">Want to Play Like Tiger???</a>
     </div>
-
     <section class="moment-summary">
       <ol>
         <li>
@@ -46,7 +72,6 @@
         </li>
       </ol>
     </section>
-
     <div class="moment">
       <h2 class="moment-title">2005 Masters Chip-In on 16</h2>
       <div class="video-container">
@@ -59,9 +84,7 @@
         </iframe>
       </div>
     </div>
-
     <hr class="divider"/>
-
     <div class="moment">
       <h2 class="moment-title">2000 U.S. Open at Pebble Beach</h2>
       <div class="video-container">
@@ -74,9 +97,7 @@
         </iframe>
       </div>
     </div>
-
     <hr class="divider"/>
-
     <div class="moment">
       <h2 class="moment-title">2019 Masters Comeback</h2>
       <div class="video-container">
@@ -90,13 +111,10 @@
         </iframe>
       </div>
     </div>
-
   </main>
-
   <footer class="page-footer">
     <a href="#top" class="back-to-top" aria-label="Back to top">Top</a>
   </footer>
-
   <script>
     const footer = document.querySelector('.page-footer');
     let threshold = document.documentElement.scrollHeight / 2;
@@ -110,6 +128,5 @@
     });
     updateBackToTop();
   </script>
-
 </body>
 </html>
