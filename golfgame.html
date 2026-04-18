@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Golf Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #3a8c3a; overflow: hidden; font-family: monospace; }
+    #golf-header {
+      background: #2d6e2d;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px #1a4a1a;
+    }
+    #golf-canvas { display: block; cursor: crosshair; }
+    #golf-hint {
+      text-align: center;
+      font-size: 13px;
+      color: #c8f0c8;
+      padding: 6px 0 8px;
+      background: #2d6e2d;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="golf-header">⛳ Golf Game ⛳</div>
+  <canvas id="golf-canvas"></canvas>
+  <div id="golf-hint">Click anywhere on the course to shoot!</div>
+
+  <script>
+    const canvas = document.getElementById('golf-canvas');
+    const ctx = canvas.getContext('2d');
+    const hint = document.getElementById('golf-hint');
+
+    const HEADER_H = document.getElementById('golf-header').offsetHeight;
+    const HINT_H = document.getElementById('golf-hint').offsetHeight;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - HEADER_H - HINT_H;
+    }
+    resize();
+    window.addEventListener('resize', () => { resize(); });
+
+    const GOLFER_X = 80;
+    const ARC_SHOW = 22;
+
+    let W, H, GROUND_Y, HOLE_X, HOLE_R;
+
+    function setDimensions() {
+      W = canvas.width;
+      H = canvas.height;
+      GROUND_Y = H - 60;
+      HOLE_R = 14;
+    }
+
+    function randomHoleX() {
+      return Math.floor(W * 0.45 + Math.random() * (W * 0.45));
+    }
+
+    setDimensions();
+    HOLE_X = randomHoleX();
+
+    let state = 'idle';
+    let ball = { x: GOLFER_X + 22, y: GROUND_Y - 4, vx: 0, vy: 0 };
+    let swingFrame = 0;
+    let swingTarget = { x: 0, y: 0 };
+    let holein = false;
+    let showModal = false;
+    let dropProgress = 0;
+    let raf;
+    let shotCount = 0;
+
+    function simulatePath(tx, ty) {
+      const dx = tx - ball.x;
+      const dy = ty - ball.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const speed = Math.min(dist * 0.055, 18);
+      let vx = (dx / dist) * speed;
+      let vy = (dy / dist) * speed - 6;
+      let x = ball.x, y = ball.y;
+      const pts = [];
+      for (let i = 0; i < 300; i++) {
+        vy += 0.45;
+        x += vx; y += vy;
+        if (y >= GROUND_Y - 5) {
+          y = GROUND_Y - 5;
+          vy *= -0.35; vx *= 0.85;
+          if (Math.abs(vy) < 1.5) break;
+        }
+        pts.push({ x, y });
+        if (x > W + 20 || x < -20) break;
+      }
+      return pts;
+    }
+
+    function drawArcDots(mx, my) {
+      const pts = simulatePath(mx, my);
+      const show = Math.min(ARC_SHOW, pts.length);
+      for (let i = 0; i < show; i += 2) {
+        const p = pts[i];
+        const t = i / show;
+        const r = 3.5 - t * 1.8;
+        const alpha = 0.7 - t * 0.65;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(r, 1), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+      }
+    }
+
+    function drawGround() {
+      ctx.fillStyle = '#4aaa4a';
+      ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+      ctx.fillStyle = '#3a8c3a';
+      ctx.fillRect(0, GROUND_Y, W, 6);
+      ctx.fillStyle = '#45a045';
+      for (let x = 0; x < W; x += 40) ctx.fillRect(x, GROUND_Y, 20, H - GROUND_Y);
+    }
+
+    function drawHole() {
+      ctx.fillStyle = '#8B5E3C';
+      ctx.fillRect(HOLE_X - 1, GROUND_Y - 55, 3, 55);
+      ctx.fillStyle = '#e03030';
+      ctx.beginPath();
+      ctx.moveTo(HOLE_X + 2, GROUND_Y - 55);
+      ctx.lineTo(HOLE_X + 22, GROUND_Y - 46);
+      ctx.lineTo(HOLE_X + 2, GROUND_Y - 37);
+      ctx.fill();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.ellipse(HOLE_X, GROUND_Y + 2, HOLE_R, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.ellipse(HOLE_X, GROUND_Y, HOLE_R, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawGolfer(swingAngle) {
+      const gx = GOLFER_X, gy = GROUND_Y;
+      ctx.save();
+      ctx.translate(gx, gy);
+      ctx.fillStyle = '#1a3a6e';
+      ctx.fillRect(-6, -22, 5, 22);
+      ctx.fillRect(2, -22, 5, 22);
+      ctx.fillStyle = '#e8c87a';
+      ctx.fillRect(-8, -40, 16, 20);
+      ctx.fillStyle = '#f5deb3';
+      ctx.fillRect(-5, -52, 10, 12);
+      ctx.fillStyle = '#c8102e';
+      ctx.fillRect(-7, -56, 14, 5);
+      ctx.fillRect(-4, -60, 8, 4);
+      ctx.save();
+      ctx.translate(8, -35);
+      ctx.rotate(swingAngle);
+      ctx.fillStyle = '#f5deb3';
+      ctx.fillRect(0, 0, 4, 18);
+      ctx.fillStyle = '#888';
+      ctx.fillRect(2, 14, 2, 28);
+      ctx.fillStyle = '#555';
+      ctx.fillRect(-2, 40, 10, 5);
+      ctx.restore();
+      ctx.restore();
+    }
+
+    function drawBall() {
+      if (state === 'dropping') {
+        const sinkY = (GROUND_Y - 5) + dropProgress * 12;
+        const scale = 1 - dropProgress * 0.7;
+        if (scale <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = 1 - dropProgress * 0.8;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(HOLE_X, sinkY, 5 * scale, 5 * scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
+      if (state === 'done') return;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(ball.x - 3, ball.y); ctx.lineTo(ball.x + 3, ball.y); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(ball.x, ball.y - 3); ctx.lineTo(ball.x, ball.y + 3); ctx.stroke();
+    }
+
+    function drawHoleInOne() {
+      ctx.save();
+      ctx.font = 'bold 48px monospace';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = '#7a5800';
+      ctx.lineWidth = 5;
+      ctx.strokeText('HOLE IN ONE!', W / 2, H / 2 - 20);
+      ctx.fillStyle = '#ffe600';
+      ctx.fillText('HOLE IN ONE!', W / 2, H / 2 - 20);
+      ctx.restore();
+    }
+
+    function drawModal() {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, W, H);
+      const bw = 300, bh = 160, bx = W / 2 - 150, by = H / 2 - 80;
+      ctx.fillStyle = '#2d6e2d';
+      ctx.strokeStyle = '#ffe600';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 10);
+      ctx.fill(); ctx.stroke();
+      ctx.font = 'bold 20px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(holein ? 'Amazing shot!' : 'So close!', W / 2, by + 44);
+      ctx.font = '14px monospace';
+      ctx.fillStyle = '#c8f0c8';
+      ctx.fillText(holein ? 'You got it in one!' : 'Ball missed the hole.', W / 2, by + 72);
+      ctx.font = '13px monospace';
+      ctx.fillStyle = '#aaddaa';
+      ctx.fillText('Shot ' + shotCount + ' | New hole ahead!', W / 2, by + 96);
+      ctx.fillStyle = '#ffe600';
+      ctx.beginPath();
+      ctx.roundRect(W / 2 - 80, by + 112, 160, 36, 6);
+      ctx.fill();
+      ctx.font = 'bold 15px monospace';
+      ctx.fillStyle = '#1a3a00';
+      ctx.fillText('Next Hole', W / 2, by + 136);
+    }
+
+    let mousePos = { x: -999, y: -999 };
+
+    function render() {
+      setDimensions();
+      ctx.clearRect(0, 0, W, H);
+      drawGround();
+      drawHole();
+
+      let swingAngle = 0;
+      if (state === 'swing') {
+        swingAngle = Math.sin(swingFrame / 6) * 1.4;
+        if (swingFrame < 18) swingFrame++;
+        else { state = 'flying'; launchBall(); }
+      }
+      if (state === 'flying' || state === 'rolling') updateBall();
+      if (state === 'dropping') {
+        dropProgress += 0.04;
+        if (dropProgress >= 1) {
+          state = 'done';
+          setTimeout(() => { showModal = true; render(); }, 600);
+        }
+      }
+
+      if (state === 'idle') drawArcDots(mousePos.x, mousePos.y);
+      drawGolfer(swingAngle);
+      drawBall();
+      if (holein && (state === 'dropping' || state === 'done')) drawHoleInOne();
+      if (showModal) drawModal();
+      if (!showModal) raf = requestAnimationFrame(render);
+    }
+
+    function launchBall() {
+      const dx = swingTarget.x - ball.x;
+      const dy = swingTarget.y - ball.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const speed = Math.min(dist * 0.055, 18);
+      ball.vx = (dx / dist) * speed;
+      ball.vy = (dy / dist) * speed - 6;
+    }
+
+    function updateBall() {
+      if (state === 'flying') {
+        ball.vy += 0.45;
+        ball.x += ball.vx; ball.y += ball.vy;
+        if (ball.y >= GROUND_Y - 5) {
+          ball.y = GROUND_Y - 5;
+          ball.vy *= -0.35; ball.vx *= 0.85;
+          if (Math.abs(ball.vy) < 1.5) state = 'rolling';
+        }
+        if (ball.y >= GROUND_Y - 10 && Math.abs(ball.x - HOLE_X) < HOLE_R) triggerDrop();
+      } else if (state === 'rolling') {
+        ball.vx *= 0.92;
+        ball.x += ball.vx;
+        ball.y = GROUND_Y - 5;
+        if (Math.abs(ball.x - HOLE_X) < HOLE_R) { triggerDrop(); return; }
+        if (Math.abs(ball.vx) < 0.15) {
+          ball.vx = 0; holein = false; state = 'done';
+          setTimeout(() => { showModal = true; render(); }, 400);
+        }
+      }
+    }
+
+    function triggerDrop() {
+      holein = true;
+      ball.x = HOLE_X; ball.y = GROUND_Y - 5;
+      ball.vx = 0; ball.vy = 0;
+      dropProgress = 0;
+      state = 'dropping';
+    }
+
+    function nextHole() {
+      setDimensions();
+      HOLE_X = randomHoleX();
+      ball = { x: GOLFER_X + 22, y: GROUND_Y - 4, vx: 0, vy: 0 };
+      state = 'idle'; swingFrame = 0; holein = false; showModal = false; dropProgress = 0;
+      hint.textContent = 'Click anywhere on the course to shoot!';
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(render);
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      const r = canvas.getBoundingClientRect();
+      mousePos = { x: e.clientX - r.left, y: e.clientY - r.top };
+    });
+
+    canvas.addEventListener('click', e => {
+      const r = canvas.getBoundingClientRect();
+      const cx = e.clientX - r.left, cy = e.clientY - r.top;
+      if (showModal) {
+        const by = H / 2 - 80;
+        if (cx > W / 2 - 80 && cx < W / 2 + 80 && cy > by + 112 && cy < by + 148) nextHole();
+        return;
+      }
+      if (state === 'idle') {
+        swingTarget = { x: cx, y: cy };
+        state = 'swing'; swingFrame = 0; shotCount++;
+        hint.textContent = 'Swing!';
+      }
+    });
+
+    raf = requestAnimationFrame(render);
+  </script>
+</body>
+</html>
