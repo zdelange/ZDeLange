@@ -25,10 +25,32 @@
       padding: 6px 0 8px;
       background: #2d6e2d;
     }
+    #nav {
+      background: #2d6e2d;
+      padding: 10px 20px;
+      border-bottom: 2px solid #1a4a1a;
+    }
+    #nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      background: #1a4a1a;
+      border-radius: 4px;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+    #nav a:hover {
+      background: #0f2f0f;
+    }
   </style>
 </head>
 <body>
 
+  <div id="nav">
+    <a href="index.html">Home</a>
+  </div>
   <div id="golf-header">⛳ Golf Game ⛳</div>
   <canvas id="golf-canvas"></canvas>
   <div id="golf-hint">Click anywhere on the course to shoot!</div>
